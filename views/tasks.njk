@@ -1,0 +1,26 @@
+{% extends layout %}
+{% block  content %}
+<main class="container">
+
+  <div>
+    <form action="/tasks" method="post">
+    <div class="mb3">
+
+      <label for="task" class="form-label">Task</label>
+      <input type="text" name="task" id="task" value="{{task}}" placeholder="Skriv mannen" required> 
+    </div>
+    <div class="mb3">
+        <button type="submit" class="btn btn-primary">Add task</button>
+    </div>
+      </form>
+    </div>
+    <div>
+      {% for task in tasks %}
+      <ul>
+        <li>{{ task.task }}</li>
+      {% endfor %}
+      </ul>
+    </div>
+    
+</main>
+  {% endblock %}
