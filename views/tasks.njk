@@ -3,7 +3,7 @@
 <main class="container">
 
   {% include 'components/taskform.njk'%}
-  
+
       <ul class="list-group" >
       {% for task in tasks %}
         <li class="list-group-item d-flex justify-content-between" >
@@ -19,6 +19,25 @@
         </li>
       {% endfor %}
       </ul>
-    
+    <div id="liveAlertPlaceholder"></div>
+
+    <script>
+      var alertPlaceholder = document.getElementById('liveAlertPlaceholder')
+var alertTrigger = document.getElementById('liveAlertBtn')
+
+function alert(message, type) {
+  var wrapper = document.createElement('div')
+  wrapper.innerHTML = '<div class="alert alert-' + type + ' alert-dismissible" role="alert">' + message + '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>'
+
+  alertPlaceholder.append(wrapper)
+}
+
+if (alertTrigger) {
+  alertTrigger.addEventListener('click', function () {
+    alert('Du suger emil!', 'success')
+  })
+}
+    </script>
+
 </main>
   {% endblock %}

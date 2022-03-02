@@ -10,14 +10,19 @@ const pool = require('../database');
     DELETE /:id - Delete a task by id
 */
 router.get('/', async (req, res, next) => {
-    await pool.promise()
+    const flash = req.session.flash;
+    console.log(flash)
+    req.session.flash = null;
+    await pool
+        .promise()
         .query('SELECT * FROM tasks')
         .then(([rows, fields]) => {
-              res.render('tasks.njk', {
+            res.render('tasks.njk', {
+                flash: flash,
                 tasks: rows,
                 title: 'Tasks',
                 layout: 'layout.njk'
-              });
+            });
         })
         .catch(err => {
             console.log(err);
@@ -70,7 +75,14 @@ router.get('/:id/delete', async (req, res, next) => {
         .query('DELETE FROM tasks WHERE id = ?', [id])
         .then((response) => {
             console.log(response);
-            res.redirect('/tasks');
+            if(response[0].affectedRows === 1) {
+                req.session.flash = "Task deleted";
+                res.redirect('/tasks');
+
+            } else {
+                req.session.flash = "Task not found";
+                res.status(400).redirect('/tasks');
+            }
         })
         .catch(err => {
             console.log(err);
@@ -84,42 +96,42 @@ router.get('/:id/delete', async (req, res, next) => {
 router.post('/', async (req, res, next) => {
     // { "task": "koda post" }
     const task = req.body.task;
-        if(task.length <3) {
-            res.status(400).json({
-                task: {
-                    error: "A task must have at least 3 characters"
-                }
-            })
-        }
-
-    await pool.promise()
-    .query('INSERT INTO tasks (task) VALUES (?)', [task])
-    .then((response) => {
-        console.log(response[0].affectedRows);
-        if (response[0].affectedRows == 1) {
-
-            res.redirect('/tasks');
-        }else{
-            res.status(500).json({message: "det funkade inte!"});
-        }
-
-        /*
-        res.json({
+    if (task.length < 3) {
+        res.status(400).json({
             task: {
-                data: response
-            }
-        });*/
-    })
-    .catch(err => {
-        console.log(err);
-        res.status(500).json({
-            task: {
-                error: 'Error getting tasks'
+                error: "A task must have at least 3 characters"
             }
         })
-    });
-    
-    
+    }
+
+    await pool.promise()
+        .query('INSERT INTO tasks (task) VALUES (?)', [task])
+        .then((response) => {
+            console.log(response[0].affectedRows);
+            if (response[0].affectedRows == 1) {
+
+                res.redirect('/tasks');
+            } else {
+                res.status(500).json({ message: "det funkade inte!" });
+            }
+
+            /*
+            res.json({
+                task: {
+                    data: response
+                }
+            });*/
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({
+                task: {
+                    error: 'Error getting tasks'
+                }
+            })
+        });
+
+
     // res.json(req.body);
 
 });
